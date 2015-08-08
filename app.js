@@ -8,7 +8,12 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
+var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+
 var app = express();
+
+var Parse = require('parse').Parse;
+Parse.initialize("FqNt8xkKnxeEdBqV5te9vJAOQQ7dRNsO69Bqno9y", "yrRCAxIDLnAxnKaBltA2YfznMnh6eEY2uuG0QCDl");
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -26,11 +31,11 @@ app.use('/', routes);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+/*app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
-});
+});*/
 
 // error handlers
 
