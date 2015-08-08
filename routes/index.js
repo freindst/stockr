@@ -16,7 +16,7 @@ router.get('/quote', function(req, res){
 })
 
 router.post('/quote', function(req, res){
-	var stockname = req.body.stockname;
+	var stockname = (req.body.stockname == 'else') ? req.body.nondefault: req.body.stockname;
 	var json_obj = JSON.parse(Get(Url(stockname)));
 	var stock = json_obj.query.results.quote;
 	res.render('stock', {stock: stock});
