@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var stocks = require('./routes/stocks');
 
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
@@ -29,13 +30,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/users', users);
+app.use('/stocks', stocks);
 
 // catch 404 and forward to error handler
-/*app.use(function(req, res, next) {
+app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
-});*/
+});
 
 // error handlers
 
@@ -61,5 +63,24 @@ app.use(function(err, req, res, next) {
   });
 });
 
+module.exports = function (req) {
+  // Simulate I/O with a sleep
+  sleep(300);
+  // And then return the result!
+  return {
+    method: req.method,
+    url: req.url,
+    date: (new Date).toString()
+  }
+};
+
+var Fiber = require('fibers');
+function sleep(ms) {
+  var fiber = Fiber.current;
+  setTimeout(function() {
+      fiber.run();
+  }, ms);
+  Fiber.yield();
+}
 
 module.exports = app;
