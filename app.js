@@ -9,6 +9,15 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var stocks = require('./routes/stocks');
 
+var braintree = require("braintree");
+
+var gateway = braintree.connect({
+  environment: braintree.Environment.Sandbox,
+  merchantId: "useYourMerchantId",
+  publicKey: "useYourPublicKey",
+  privateKey: "useYourPrivateKey"
+});
+
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 var app = express();

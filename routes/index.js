@@ -4,11 +4,36 @@ var router = express.Router();
 var Parse = require('parse').Parse;
 Parse.initialize("FqNt8xkKnxeEdBqV5te9vJAOQQ7dRNsO69Bqno9y", "yrRCAxIDLnAxnKaBltA2YfznMnh6eEY2uuG0QCDl");
 
+var braintree = require("braintree");
+
+var gateway = braintree.connect({
+  environment: braintree.Environment.Sandbox,
+  merchantId: "nbxqn839vhj8tr3z",
+  publicKey: "cyc9gssnmpjbzxbq",
+  privateKey: "75b2a54536113180c71aab5db13a50d3"
+});
+
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Stockr' });
+	res.render('index', { title: 'Stockr' });
+});
+
+app.get("/client_token", function (req, res) {
+	gateway.clientToken.generate({}, function (err, response) {
+		res.send(response.clientToken);
+	});
+});
+
+app.post("/payment-methods", function (req, res) {
+	var nonce = req.body.payment_method_nonce;
+    // Use payment method nonce here
+    gateway.transaction.sale({
+  	    amount: '10.00',
+    	paymentMethodNonce: nonce,
+    }, function (err, result) {
+    });
 });
 
 router.get('/quote', function(req, res){
@@ -50,18 +75,17 @@ router.post('/joinGame', function(req, res){
 							stocksInHand.push({
 								share: '0',
 								symbol: stocks[i].attributes.Symbol
-								
 							});
 						}
 						transaction.save({stocksInHand: stocksInHand});
 					})
 					res.send('done')
-				});				
-			//game.attributes.CurrentPlayers.push(user.attributes.username);
-
+				});	
 		});
 	});
 });
+
+
 
 router.post('/quote', function(req, res){
 	var stockname = req.body.stockname;
