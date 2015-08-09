@@ -20,19 +20,20 @@ router.get('/', function(req, res, next) {
 	res.render('index', { title: 'Stockr' });
 });
 
-app.get("/client_token", function (req, res) {
+router.get("/client_token", function (req, res) {
 	gateway.clientToken.generate({}, function (err, response) {
 		res.send(response.clientToken);
 	});
 });
 
-app.post("/payment-methods", function (req, res) {
+router.post("/payment-methods", function (req, res) {
 	var nonce = req.body.payment_method_nonce;
     // Use payment method nonce here
     gateway.transaction.sale({
   	    amount: '10.00',
     	paymentMethodNonce: nonce,
     }, function (err, result) {
+    	res.send(result);
     });
 });
 
@@ -84,6 +85,20 @@ router.post('/joinGame', function(req, res){
 		});
 	});
 });
+
+router.get('/in_game/:transaction_id', function(req, res){
+	var transaction_id = req.params.transaction_id;
+	var query = new Parse.Query("Transaction");
+	query.get(transaction_id).then(function(transaction){
+		var stocksQuery = new Parse.Query("CurrentQuote");
+		stocksQuery.find().then(function(stocks){
+			res.render('in_game', {
+				stocks: stocks,
+				transaction: transaction
+			})
+		})
+	})
+})
 
 
 
