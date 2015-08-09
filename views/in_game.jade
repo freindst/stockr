@@ -1,4 +1,4 @@
-form
+form(method='post', action='/findStockById')
     label You currently has:
     input(type='text', readonly, name='current_money', value= transaction.attributes.currentMoney)
     hr
@@ -7,7 +7,7 @@ form
         if stock.share != "0"
           tr
             td
-              a(href='/getStockBySymbol/' + stock.symbol)= stock.symbol
+              a(href='/getStockBySymbol/' + stock.symbol)= stock.symbol + " | "
             td= stock.share
             td
               button(onclick='window.location.href="/sellStockBySymbol/'+ stock.symbol + '"', value = Sell)
@@ -19,6 +19,7 @@ form
     hr
     a(href='/listAllQuotes') Full Quote Query
     br
-    select
+    select(name = "stock_id")
       each stock in stocks
-        option(value= stock.id)= stock.attributes.Symbol
+        option(value= stock.id)= stock.attributes.Symbol + " || " + stock.attributes.Name
+    input(type='submit', value='Submit')

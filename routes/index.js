@@ -61,7 +61,11 @@ router.post('/joinGame', function(req, res){
 	var gameQuery = new Parse.Query('Game');
 	userQuery.get(req.body.user_id).then(function(user){
 		gameQuery.get(req.body.game_id).then(function(game){
-			var currentPlayers = game.attributes.CurrentPlayers;
+			if (game.attributes.CurrentPlayers == null) {
+				var currentPlayers = new Array();
+			} else {
+				var currentPlayers = game.attributes.CurrentPlayers;
+			}			
 			currentPlayers.push(user.attributes.username);
 			game.save({CurrentPlayers: currentPlayers});
 				newTransaction.save({
@@ -80,14 +84,25 @@ router.post('/joinGame', function(req, res){
 						}
 						transaction.save({stocksInHand: stocksInHand});
 					})
-					res.send('done')
+					//res.send('done')
+					res.redirect('/all_game');
 				});	
 		});
 	});
 });
 
+router.get('/all_game', function(req, res) {
+	var query = new Parse.Query("Transaction");
+	query.find().then(function(results){
+		res.render('transaction_list',{
+			games: results
+		});
+	})
+})
+
 router.get('/in_game/:transaction_id', function(req, res){
 	var transaction_id = req.params.transaction_id;
+	req.session.transaction_id = transaction_id
 	var query = new Parse.Query("Transaction");
 	query.get(transaction_id).then(function(transaction){
 		var stocksQuery = new Parse.Query("CurrentQuote");
@@ -100,7 +115,44 @@ router.get('/in_game/:transaction_id', function(req, res){
 	})
 })
 
+router.post('/findStockById', function(req, res){
+	console.log(req.session.transaction_id);
+	var stock_id = req.body.stock_id;
+	var query = new Parse.Query('CurrentQuote');
+	query.get(stock_id).then(function(stock){
+		price = (+stock.attributes.QueryResult.Bid/2 + +stock.attributes.QueryResult.Ask/2);
+		console.log(price);
+		res.render('theStock', {
+			stock: stock,
+			price: price
+		});
+	});
+})
 
+router.post('/bid', function(req, res) {
+	var bid_number = req.body.share_number;
+	var stock_symbol = req.body.stock_symbol;
+	var price = req.body.price;
+	console.log(price);
+	var query = new Parse.Query("Transaction");
+	query.get(req.session.transaction_id).then(function(transaction){
+		if (transaction.attributes.currentMoney < bid_number * price) {
+			res.send('You do not have enough money');
+		} else {
+			temp = transaction.attributes.stocksInHand;
+			for (var i in temp) {
+				if (temp[i].symbol == stock_symbol) {
+					temp[i].share = bid_number;
+				}
+			}
+			transaction.save({
+				currentMoney: transaction.attributes.currentMoney - bid_number * price,
+				stocksInHand: temp
+			}).then(function(){});
+		}
+		res.redirect('/in_game/' + req.session.transaction_id);
+	})
+})
 
 router.post('/quote', function(req, res){
 	var stockname = req.body.stockname;

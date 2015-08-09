@@ -4,6 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
+
+
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -25,6 +28,7 @@ var app = express();
 var Parse = require('parse').Parse;
 Parse.initialize("FqNt8xkKnxeEdBqV5te9vJAOQQ7dRNsO69Bqno9y", "yrRCAxIDLnAxnKaBltA2YfznMnh6eEY2uuG0QCDl");
 
+app.use(session({secret: '1234567890QWERTY'}));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
