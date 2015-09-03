@@ -162,8 +162,7 @@ router.post('/quote', function(req, res){
 })
 
 router.get('/test', function(req, res) {
-	console.log(userStocksInitialize());
-	res.send('test')
+	res.send('test');
 })
 
 router.get('/user', function(req, res) {
