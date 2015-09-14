@@ -54,7 +54,47 @@ router.get('/joinGame', function(req, res){
 	});
 })
 
-router.post('/joinGame', function(req, res){
+
+//HTTP Request POST join a new game
+router.post('/joinGame', function(req, res) {
+	var user_id = req.body.user_id;
+	var game_id = req.body.game_id;
+	var NewTransaction = Parse.Object.extend("Transaction");
+	var newTransaction = new NewTransaction();
+	var userQuery = new Parse.Query("User");
+	var gameQuery = new Parse.Query('Game');
+	userQuery.get(user_id).then(function(user){
+		gameQuery.get(game_id).then(function(game){
+			if (game.attributes.CurrentPlayers == null) {
+				var currentPlayers = new Array();
+			} else {
+				var currentPlayers = game.attributes.CurrentPlayers;
+			}
+			currentPlayers.push(user.attributes.username);
+			game.save({CurrentPlayers: currentPlayers});
+			newTransaction.save({
+				gameName: game.attributes.Name,
+				userName: user.attributes.username,
+				currentMoney: 100000
+			}).then(function(transaction){
+				var query = new Parse.Query('CurrentQuote');
+				query.find().then(function(stocks){
+					var stocksInHand = new Array();
+					for (var i in stocks) {
+						stocksInHand.push({
+							share: '0',
+							symbol: stocks[i].attributes.Symbol
+						});
+					}
+					transaction.save({stocksInHand: stocksInHand});
+				});
+				res.send('success');
+			});
+		});
+	})
+})
+
+/*router.post('/joinGame', function(req, res){
 	var NewTransaction = Parse.Object.extend("Transaction");
 	var newTransaction = new NewTransaction();
 	var userQuery = new Parse.Query("User");
@@ -89,7 +129,7 @@ router.post('/joinGame', function(req, res){
 				});	
 		});
 	});
-});
+});*/
 
 router.get('/all_game', function(req, res) {
 	var query = new Parse.Query("Transaction");
@@ -163,6 +203,18 @@ router.post('/quote', function(req, res){
 
 router.get('/test', function(req, res) {
 	res.send('test');
+})
+
+router.post('/test', function(req, res) {
+	json = '{"result":' + req.body.test + "}"
+	res.send(json);
+})
+
+router.get('/get/:stock_symbol', function(req, res) {
+	var stockname = req.params.stock_symbol;
+	var json_obj = JSON.parse(Get(Url(stockname)));
+	var stock = json_obj.query.results.quote;
+	res.send(stock);
 })
 
 router.get('/user', function(req, res) {
